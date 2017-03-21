@@ -1,0 +1,5 @@
+name: MineShards
+version: 1.0
+main: main.MineShards
+commands:
+  minereset:
