@@ -1,32 +1,18 @@
 package main;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_11_R1.EnumParticle;
-import net.minecraft.server.v1_11_R1.PacketPlayOutWorldParticles;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitScheduler;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
-
-import static org.bukkit.Bukkit.getServer;
 
 /**
  * Created by Cory on 28/02/2017.
@@ -42,6 +28,7 @@ public class Crates {
     ArrayList<ItemStack> rareCrate = new ArrayList<ItemStack>();
     ArrayList<ItemStack> epicCrate = new ArrayList<ItemStack>();
     ArrayList<ItemStack> legendaryCrate = new ArrayList<ItemStack>();
+    ArrayList<ItemStack> voteCrate = new ArrayList<ItemStack>();
 
     public ArrayList<ItemStack> getCrateAsList(CrateType ct) {
         switch(ct) {
@@ -55,6 +42,8 @@ public class Crates {
                 return this.epicCrate;
             case LEGENDARY:
                 return this.legendaryCrate;
+            case VOTE:
+                return this.voteCrate;
             default: return null;
         }
     }
@@ -63,67 +52,227 @@ public class Crates {
         this.mineShards = instance;
 
         //*commons*//
-        commonCrate.add(MineShards.genCustomItem(Material.STONE_SWORD, ChatColor.DARK_GRAY + "Hand Crafted Stone Dagger", "Common Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 2),  new EnchantWrapper(Enchantment.DURABILITY, 1)));
-        commonCrate.add(MineShards.genCustomItem(Material.IRON_PICKAXE, ChatColor.GRAY + "Notched Pickaxe", "Common Crate Treasure", new EnchantWrapper(Enchantment.LOOT_BONUS_BLOCKS, 1)));
-        commonCrate.add(new ItemStack(Material.COBBLESTONE, 64));
-        commonCrate.add(MineShards.genCustomItem(Material.STONE_PICKAXE, ChatColor.DARK_GREEN + "Poor Tim's Pickaxe", "Common Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 3), new EnchantWrapper(Enchantment.DURABILITY, 3)));
-        commonCrate.add(MineShards.genCustomItem(Material.STONE_AXE, ChatColor.DARK_GREEN + "Poor Tim's Axe", "Common Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 3), new EnchantWrapper(Enchantment.DURABILITY, 3)));
-        commonCrate.add(new ItemStack(Material.COOKED_BEEF, 16));
-        commonCrate.add(MineShards.genCustomItem(Material.LEATHER_LEGGINGS, ChatColor.YELLOW + "Forduz's Leggings", "Common Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
-        commonCrate.add(MineShards.genCustomItem(Material.LEATHER_HELMET, ChatColor.YELLOW + "Forduz's Helmet", "Common Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
-        commonCrate.add(MineShards.genCustomItem(Material.LEATHER_CHESTPLATE, ChatColor.YELLOW + "Forduz's Chestpiece", "Common Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
-        commonCrate.add(MineShards.genCustomItem(Material.LEATHER_BOOTS, ChatColor.YELLOW + "Forduz's Boots", "Common Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
-        commonCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.YELLOW + "Shiny Backstabber", "Common Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 1)));
-        commonCrate.add(new ItemStack(Material.BOW, 1));
-        commonCrate.add(new ItemStack(Material.ARROW, 12));
-        commonCrate.add(MineShards.genCustomItem(Material.STONE_SWORD, ChatColor.DARK_AQUA + "Polish Blade", "Common Crate Treasure", new EnchantWrapper(Enchantment.LOOT_BONUS_MOBS, 1)));
-        commonCrate.add(MineShards.genCustomItem(Material.STONE_SWORD, ChatColor.RED + "Afterburner", "Common Crate Treasure", new EnchantWrapper(Enchantment.FIRE_ASPECT, 1)));
-        ItemStack ganker = MineShards.genCustomItem(Material.DIAMOND_SWORD, ChatColor.RED + "Ganker", "Common Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 5));
-        ganker.setDurability((short)1561);
-        commonCrate.add(ganker);
-        commonCrate.add(MineShards.genCustomItem(Material.FISHING_ROD, ChatColor.YELLOW + "Catcha", "Common Crate Treasure", new EnchantWrapper(Enchantment.LURE, 3)));
+        commonCrate.add(mineShards.getCrate(CrateType.UNCOMMON));
+        commonCrate.add(createMoneyNote(500));
+        commonCrate.add(createMoneyNote(1000));
+        commonCrate.add(MineShards.genCustomItem(Material.BOW, ChatColor.GREEN + "'Feel the Power'", "Common Crate Treasure", new EnchantWrapper(Enchantment.ARROW_DAMAGE, 1)));
+        commonCrate.add(MineShards.genCustomItem(Material.STONE_PICKAXE, ChatColor.YELLOW + "Prisoner's Fortune", "Common Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED,2 ),
+                new EnchantWrapper(Enchantment.DURABILITY, 1), new EnchantWrapper(Enchantment.LOOT_BONUS_BLOCKS, 1)));
+        commonCrate.add(MineShards.genCustomItem(Material.STONE_PICKAXE, ChatColor.RED + "UPGRADE!", "Common Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 3)));
+        commonCrate.add(MineShards.genCustomItem(Material.IRON_PICKAXE, ChatColor.WHITE + "Iron Fiend", "Common Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 3)));
+        commonCrate.add(MineShards.genCustomItem(Material.IRON_PICKAXE, ChatColor.RED + "Hastely Miner", "Common Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 3)));
+        commonCrate.add(MineShards.genCustomItem(Material.STONE_AXE, ChatColor.BLUE + "Lumberjack's upgrade", "Common Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        commonCrate.add(MineShards.genCustomItem(Material.STONE_PICKAXE, ChatColor.RED + "UPGRADE!", "Common Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 3)));
+        commonCrate.add(MineShards.genCustomItem(Material.IRON_AXE, ChatColor.GREEN + "Lumberjack's precious", "Common Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 1),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        commonCrate.add(MineShards.genCustomItem(Material.STONE_SWORD, ChatColor.YELLOW + "Toothpick", "Common Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        commonCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.DARK_RED + "Blood Lust", "Common Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 1),
+                new EnchantWrapper(Enchantment.FIRE_ASPECT, 1)));
+        commonCrate.add(MineShards.genCustomItem(Material.FISHING_ROD, ChatColor.DARK_GREEN + "Fisherman's Friend", "Common Crate Treasure", new EnchantWrapper(Enchantment.LURE, 1),
+                new EnchantWrapper(Enchantment.DURABILITY, 2), new EnchantWrapper(Enchantment.LUCK, 1)));
+
+        commonCrate.add(new ItemStack(Material.DIAMOND_PICKAXE, 1));
+        commonCrate.add(new ItemStack(Material.DIAMOND_AXE, 1));
+        commonCrate.add(new ItemStack(Material.COOKED_BEEF, 32));
+        commonCrate.add(new ItemStack(Material.ARROW, 32));
+        commonCrate.add(new ItemStack(Material.COAL, 48));
+        commonCrate.add(new ItemStack(Material.IRON_INGOT, 16));
+        commonCrate.add(new ItemStack(Material.DIAMOND, 3));
+
+        commonCrate.add(MineShards.genCustomItem(Material.LEATHER_HELMET, ChatColor.BLUE + "Upgraded Prisoner Helmet", "Common Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        commonCrate.add(MineShards.genCustomItem(Material.LEATHER_CHESTPLATE, ChatColor.BLUE + "Upgraded Prisoner Chestpiece", "Common Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        commonCrate.add(MineShards.genCustomItem(Material.LEATHER_LEGGINGS, ChatColor.BLUE + "Upgraded Prisoner Leggings", "Common Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        commonCrate.add(MineShards.genCustomItem(Material.LEATHER_BOOTS, ChatColor.BLUE + "Upgraded Prisoner Boots", "Common Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
 
         //*Uncommons*//
-        uncommonCrate.add(new ItemStack(Material.LAPIS_BLOCK, 10));
-        uncommonCrate.add(new ItemStack(Material.DIAMOND, 3));
-        uncommonCrate.add(new ItemStack(Material.REDSTONE, 64));
-        uncommonCrate.add(MineShards.genCustomItem(Material.BOW, ChatColor.DARK_GREEN + "Long Shot", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.ARROW_DAMAGE, 1)));
+        uncommonCrate.add(mineShards.getCrate(CrateType.RARE));
+        uncommonCrate.add(createMoneyNote(1000));
+        uncommonCrate.add(createMoneyNote(1750));
+        uncommonCrate.add(MineShards.genCustomItem(Material.BOW, ChatColor.GOLD + "'Do you like to play with Fire?'", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.ARROW_DAMAGE, 3),
+                new EnchantWrapper(Enchantment.ARROW_FIRE, 1)));
+        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_PICKAXE, ChatColor.DARK_BLUE + "Sturdy Pickaxe", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2), new EnchantWrapper(Enchantment.LOOT_BONUS_BLOCKS, 1)));
+        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_PICKAXE, ChatColor.DARK_GREEN + "Efficient Miner", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 4),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_PICKAXE, ChatColor.LIGHT_PURPLE + "Lucky Miner", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.LOOT_BONUS_BLOCKS, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        uncommonCrate.add(MineShards.genCustomItem(Material.DIAMOND_PICKAXE, ChatColor.AQUA + "Shiiiny...", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 1),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.WHITE + "Iron Swordsman", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 3),
+                new EnchantWrapper(Enchantment.KNOCKBACK, 1)));
+        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.RED + "Fire Starter", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 2),
+                new EnchantWrapper(Enchantment.FIRE_ASPECT, 1)));
+
+
+        uncommonCrate.add(new ItemStack(Material.EXP_BOTTLE, 16));
+        uncommonCrate.add(MineShards.genCustomPotion(PotionType.REGEN, 1, 1, false, true));
         uncommonCrate.add(new ItemStack(Material.COOKED_BEEF, 32));
-        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.YELLOW + "Blood Lust", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 3)));
-        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_CHESTPLATE, ChatColor.AQUA + "Lightweight", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_FALL, 4)));
-        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_LEGGINGS, ChatColor.RED + "Spiker", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.THORNS, 2)));
-        uncommonCrate.add(new ItemStack(Material.ARROW, 32));
-        uncommonCrate.add(getTippedArrow(16, PotionType.SLOWNESS));
-        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.DARK_PURPLE + "'Do you like to play with fire?'", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.FIRE_ASPECT, 1)));
-        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_PICKAXE, ChatColor.YELLOW + "Lucky Miner", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.LOOT_BONUS_BLOCKS, 2)));
-        uncommonCrate.add(new ItemStack(Material.IRON_BLOCK, 3));
-        uncommonCrate.add(new ItemStack(Material.GOLD_ORE, 16));
-        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_PICKAXE, ChatColor.LIGHT_PURPLE + "Hastely Miner", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 4)));
-        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_PICKAXE, ChatColor.RED + "Trusty Pickaxe", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 2), new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        uncommonCrate.add(new ItemStack(Material.ARROW, 64));
+        uncommonCrate.add(new ItemStack(Material.COAL, 64));
+        uncommonCrate.add(new ItemStack(Material.IRON_INGOT, 32));
+        uncommonCrate.add(new ItemStack(Material.GOLD_INGOT, 32));
+        uncommonCrate.add(new ItemStack(Material.DIAMOND, 9));
 
+        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_HELMET, ChatColor.GRAY + "Hardened Prisoner's Helmet", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2),
+                new EnchantWrapper(Enchantment.THORNS, 2)));
+        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_CHESTPLATE, ChatColor.GRAY + "Hardened Prisoner's Chestpiece", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2),
+                new EnchantWrapper(Enchantment.THORNS, 2)));
+        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_LEGGINGS, ChatColor.GRAY + "Hardened Prisoner's Leggings", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2),
+                new EnchantWrapper(Enchantment.THORNS, 2)));
+        uncommonCrate.add(MineShards.genCustomItem(Material.IRON_BOOTS, ChatColor.GRAY + "Hardened Prisoner's Boots", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2),
+                new EnchantWrapper(Enchantment.THORNS, 2)));
+
+        uncommonCrate.add(MineShards.genCustomItem(Material.DIAMOND_CHESTPLATE, ChatColor.AQUA + "Protector", "Uncommon Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL,1),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
         //*Rares*//
-        /*Copyright Unnyman*/
-        rareCrate.add(MineShards.genCustomItem(Material.BOW, ChatColor.GREEN + "Zachary", "Rare Crate Treasure", new EnchantWrapper(Enchantment.ARROW_KNOCKBACK, 1), new EnchantWrapper(Enchantment.ARROW_DAMAGE, 2)));
-        rareCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.LIGHT_PURPLE + "Rend", "Rare Crate Treasure", new EnchantWrapper(Enchantment.SWEEPING_EDGE, 2), new EnchantWrapper(Enchantment.DAMAGE_ALL, 3)));
-        rareCrate.add(MineShards.genCustomItem(Material.IRON_CHESTPLATE, ChatColor.GREEN + "Hora's Chestpiece", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2)));
-        rareCrate.add(new ItemStack(Material.GOLD_BLOCK, 5));
-        rareCrate.add(new ItemStack(Material.DIAMOND_BLOCK, 3));
-        rareCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.RED + "Chugas", "Rare Crate Treasure", new EnchantWrapper(Enchantment.FIRE_ASPECT, 2)));
-        rareCrate.add(MineShards.genCustomItem(Material.IRON_LEGGINGS, ChatColor.GREEN + "Hora's Leggings", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2)));
+        rareCrate.add(mineShards.getCrate(CrateType.EPIC));
+        rareCrate.add(createMoneyNote(2500));
+        rareCrate.add(createMoneyNote(3250));
 
+        rareCrate.add(MineShards.genCustomItem(Material.BOW, ChatColor.YELLOW + "Long Bow", "Rare Crate Treasure", new EnchantWrapper(Enchantment.ARROW_DAMAGE, 4),
+                new EnchantWrapper(Enchantment.ARROW_FIRE, 1), new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_PICKAXE, ChatColor.DARK_GREEN + "Notched Pickaxe", "Rare Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_PICKAXE, ChatColor.GRAY + "Stolen Pickaxe", "Rare Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 1),
+                new EnchantWrapper(Enchantment.LOOT_BONUS_BLOCKS, 1)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_PICKAXE, ChatColor.GOLD + "Mine Smasher", "Rare Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 3)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_AXE, ChatColor.YELLOW + "Beheader", "Rare Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_AXE, ChatColor.DARK_RED + "Executioner", "Rare Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 1)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_AXE, ChatColor.RED + "Tim's Stolen Pickaxe", "Rare Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 4)));
+        rareCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.LIGHT_PURPLE + "Sharpened Blade", "Rare Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 4)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_SWORD, ChatColor.GREEN + "Nemesis", "Rare Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 2),
+                new EnchantWrapper(Enchantment.FIRE_ASPECT, 1)));
+
+        rareCrate.add(MineShards.genCustomItem(Material.IRON_HELMET, ChatColor.DARK_GRAY + "Durable Prisoner's Helmet", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        rareCrate.add(MineShards.genCustomItem(Material.IRON_CHESTPLATE, ChatColor.BLUE + "Durable Prisoner's Chestpiece", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        rareCrate.add(MineShards.genCustomItem(Material.IRON_LEGGINGS, ChatColor.BLUE + "Durable Prisoner's Leggings", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        rareCrate.add(MineShards.genCustomItem(Material.IRON_BOOTS, ChatColor.BLUE + "Durable Prisoner's Boots", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_HELMET, ChatColor.AQUA + "Shiny Prisoner's Helmet", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 1),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_CHESTPLATE, ChatColor.AQUA + "Shiny Prisoner's Chestpiece", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 1),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_LEGGINGS, ChatColor.AQUA + "Shiny Prisoner's Leggings", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 1),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        rareCrate.add(MineShards.genCustomItem(Material.DIAMOND_BOOTS, ChatColor.AQUA + "Shiny Prisoner's Boots", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 1),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+
+        rareCrate.add(new ItemStack(Material.COOKED_BEEF, 64));
+        rareCrate.add(new ItemStack(Material.COAL, 64));
+        rareCrate.add(new ItemStack(Material.IRON_INGOT, 48));
+        rareCrate.add(new ItemStack(Material.GOLD_INGOT, 48));
+        rareCrate.add(new ItemStack(Material.DIAMOND_BLOCK, 4));
+        rareCrate.add(new ItemStack(Material.EXP_BOTTLE, 32));
+        rareCrate.add(MineShards.genCustomPotion(PotionType.REGEN, 1, 2, false, true));
+        rareCrate.add(MineShards.genCustomPotion(PotionType.FIRE_RESISTANCE, 1, 1, false, false));
+        rareCrate.add(new ItemStack(Material.GOLDEN_APPLE, 1));
 
         //*Epics*//
-        epicCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.RED + "Chugas", "Epic Crate Treasure", new EnchantWrapper(Enchantment.FIRE_ASPECT, 2)));
+        epicCrate.add(createMoneyNote(4000));
+        epicCrate.add(createMoneyNote(5000));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_PICKAXE, ChatColor.AQUA + "Solid Pickaxe", "Epic Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_PICKAXE, ChatColor.GREEN + "Mine Looter", "Epic Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 2),
+                new EnchantWrapper(Enchantment.LOOT_BONUS_BLOCKS, 2)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_PICKAXE, ChatColor.RED + "'Blessed with a Curse'", "Epic Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 4)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_AXE, ChatColor.LIGHT_PURPLE + "Head Hunter", "Epic Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_AXE, ChatColor.DARK_BLUE + "'Jack of all Trades'", "Epic Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 2), new EnchantWrapper(Enchantment.DAMAGE_ALL, 2)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_AXE, ChatColor.YELLOW + "Lumberjack's Assistant", "Epic Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 5)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_SWORD, ChatColor.GOLD + "Blade of Flames", "Epic Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 2),
+                new EnchantWrapper(Enchantment.FIRE_ASPECT, 2), new EnchantWrapper(Enchantment.KNOCKBACK, 1)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_SWORD, ChatColor.DARK_RED + "Head Hunter", "Epic Crate Treasure", new EnchantWrapper(Enchantment.DAMAGE_ALL, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 2)));
+
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_HELMET, ChatColor.RED + "Shiny Prisoner's Helmet", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_CHESTPLATE, ChatColor.RED + "Shiny Prisoner's Chestpiece", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_LEGGINGS, ChatColor.RED + "Shiny Prisoner's Leggings", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_BOOTS, ChatColor.RED + "Shiny Prisoner's Boots", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 1)));
+
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_HELMET, ChatColor.DARK_RED + "Panzersoldat's Helmet", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_CHESTPLATE, ChatColor.DARK_RED + "Panzersoldat's Chestpiece", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_LEGGINGS, ChatColor.DARK_RED + "Panzersoldat's Leggings", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
+        epicCrate.add(MineShards.genCustomItem(Material.DIAMOND_BOOTS, ChatColor.DARK_RED + "Panzersoldat's Boots", "Rare Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
+
+        epicCrate.add(new ItemStack(Material.EXP_BOTTLE, 48));
+        epicCrate.add(MineShards.genCustomPotion(PotionType.REGEN, 2, 2, false, false));
+        epicCrate.add(new ItemStack(Material.DIAMOND_BLOCK, 4));
+        epicCrate.add(new ItemStack(Material.IRON_BLOCK, 8));
+        epicCrate.add(new ItemStack(Material.GOLD_BLOCK, 6));
+        epicCrate.add(new ItemStack(Material.GOLDEN_APPLE, 3));
 
         //*Legendary*//
-        legendaryCrate.add(MineShards.genCustomItem(Material.IRON_SWORD, ChatColor.RED + "Chugas", "Legendary Crate Treasure", new EnchantWrapper(Enchantment.FIRE_ASPECT, 2)));
+        legendaryCrate.add(createMoneyNote(25000));
+        legendaryCrate.add(createMoneyNote(50000));
+        legendaryCrate.add(MineShards.genCustomItem(Material.BOW, ChatColor.GOLD + "Divine Bow", "Legendary Crate Treasure", new EnchantWrapper(Enchantment.ARROW_DAMAGE, 5),
+                new EnchantWrapper(Enchantment.ARROW_INFINITE, 1), new EnchantWrapper(Enchantment.ARROW_KNOCKBACK, 2), new EnchantWrapper(Enchantment.ARROW_FIRE, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 3)));
+        legendaryCrate.add(MineShards.genCustomItem(Material.DIAMOND_PICKAXE, ChatColor.DARK_PURPLE + "Cursed Pickaxe", "Legendary Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 5),
+                new EnchantWrapper(Enchantment.SILK_TOUCH, 1), new EnchantWrapper(Enchantment.LOOT_BONUS_BLOCKS, 3),
+                new EnchantWrapper(Enchantment.DURABILITY, 3)));
+        legendaryCrate.add(MineShards.genCustomItem(Material.DIAMOND_AXE, ChatColor.GOLD + "'Axe of the Gods'", "Legendary Crate Treasure", new EnchantWrapper(Enchantment.DIG_SPEED, 5),
+                new EnchantWrapper(Enchantment.DAMAGE_ALL, 5), new EnchantWrapper(Enchantment.FIRE_ASPECT, 2),
+                new EnchantWrapper(Enchantment.DURABILITY, 3)));
+        legendaryCrate.add(MineShards.genCustomItem(Material.FISHING_ROD, ChatColor.DARK_AQUA + "Fisherman's Fortune", "Legendary Crate Treasure", new EnchantWrapper(Enchantment.LURE, 3),
+                new EnchantWrapper(Enchantment.LUCK, 3), new EnchantWrapper(Enchantment.DURABILITY, 3)));
+
+        legendaryCrate.add(MineShards.genCustomItem(Material.DIAMOND_HELMET, ChatColor.GOLD + "Divine Helmet", "Legendary Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 4),
+                new EnchantWrapper(Enchantment.DURABILITY, 3),
+                new EnchantWrapper(Enchantment.THORNS, 2)));
+        legendaryCrate.add(MineShards.genCustomItem(Material.DIAMOND_CHESTPLATE, ChatColor.GOLD + "Divine Chestpiece", "Legendary Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 4),
+                new EnchantWrapper(Enchantment.DURABILITY, 3),
+                new EnchantWrapper(Enchantment.THORNS, 2)));
+        legendaryCrate.add(MineShards.genCustomItem(Material.DIAMOND_LEGGINGS, ChatColor.GOLD + "Divine Leggings", "Legendary Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 4),
+                new EnchantWrapper(Enchantment.DURABILITY, 3),
+                new EnchantWrapper(Enchantment.THORNS, 2)));
+        legendaryCrate.add(MineShards.genCustomItem(Material.DIAMOND_BOOTS, ChatColor.GOLD + "Divine Boots", "Legendary Crate Treasure", new EnchantWrapper(Enchantment.PROTECTION_ENVIRONMENTAL, 4),
+                new EnchantWrapper(Enchantment.DURABILITY, 3),
+                new EnchantWrapper(Enchantment.THORNS, 2)));
+
+        legendaryCrate.add(new ItemStack(Material.GOLD_BLOCK, 64));
+        legendaryCrate.add(new ItemStack(Material.DIAMOND_BLOCK, 64));
+        legendaryCrate.add(new ItemStack(Material.IRON_BLOCK, 64));
+        legendaryCrate.add(wrapWithAmt(new ItemStack(Material.COAL_BLOCK, 128), 128));
+        legendaryCrate.add(wrapWithAmt(new ItemStack(Material.EXP_BOTTLE, 256), 256));
+        legendaryCrate.add(MineShards.genCustomPotion(PotionType.REGEN, 2, 10, false, false));
+        legendaryCrate.add(new ItemStack(Material.GOLDEN_APPLE, 15));
+        legendaryCrate.add(new ItemStack(Material.GOLDEN_APPLE, 3, (short)1));
+
+
     }
 
-    private ItemStack getTippedArrow(int amt, PotionType pt) {
-        ItemStack i = new ItemStack(Material.TIPPED_ARROW, amt);
+    private ItemStack wrapWithAmt(ItemStack i, int amt) {
+        ItemMeta itemMeta = i.getItemMeta();
+        itemMeta.setDisplayName(amt + " " + i.getType().name());
+        i.setItemMeta(itemMeta);
+        return i;
+    }
+
+    private ItemStack createMoneyNote(int amt) {
+        ItemStack i = new ItemStack(Material.PAPER, 1);
         ItemMeta im = i.getItemMeta();
-        PotionMeta pm = (PotionMeta) im;
-        pm.setBasePotionData(new PotionData(pt));
+        im.setDisplayName(ChatColor.GREEN + "Money Note");
+        im.setLore(Arrays.asList("$" + amt));
         i.setItemMeta(im);
         return i;
     }
@@ -131,8 +280,8 @@ public class Crates {
     public void openCrate(final Player p, CrateType crateType) {
         String name = crateType.toString().charAt(0) + crateType.toString().substring(1).toLowerCase();
         final Inventory spinner = Bukkit.createInventory(null, 27,  name + " Crate");
-        p.openInventory(spinner);
         SchedulerTask scheduler = new SchedulerTask(p, spinner, crateType, this);
+        p.openInventory(spinner);
         scheduler.setId(Bukkit.getScheduler().scheduleSyncRepeatingTask(mineShards, scheduler, 0L, 1L));
         this.opening.add(scheduler);
     }
@@ -152,7 +301,7 @@ public class Crates {
 }
 
 enum CrateType {
-    COMMON, UNCOMMON, RARE, EPIC, LEGENDARY;
+    COMMON, UNCOMMON, RARE, EPIC, LEGENDARY, VOTE;
 }
 
 class SchedulerTask implements Runnable {
@@ -199,7 +348,11 @@ class SchedulerTask implements Runnable {
     public void run() {
         if(counter == 150) {
             ItemStack i = spinner.getItem(13);
-            p.getInventory().addItem(i);
+            if(p.getInventory().firstEmpty() == -1) {
+                p.getWorld().dropItem(p.getLocation(), i);
+            } else {
+                p.getInventory().addItem(i);
+            }
             String unboxed;
             if(i.getItemMeta().getDisplayName() != null) {
                 unboxed = i.getItemMeta().getDisplayName();
@@ -239,7 +392,11 @@ class SchedulerTask implements Runnable {
         Bukkit.getServer().getScheduler().cancelTask(getId());
         int rdm = random.nextInt(crate.size());
         ItemStack i = crate.get(rdm);
-        p.getInventory().addItem(i);
+        if(p.getInventory().firstEmpty() == -1) {
+            p.getWorld().dropItem(p.getLocation(), i);
+        } else {
+            p.getInventory().addItem(i);
+        }
         String unboxed;
         if(i.getItemMeta().getDisplayName() != null) {
             unboxed = i.getItemMeta().getDisplayName();
